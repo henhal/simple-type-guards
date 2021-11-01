@@ -1,0 +1,28 @@
+{
+  "name": "simple-type-guards",
+  "version": "1.0.0",
+  "description": "Simple type guard helpers for TypeScript",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/henhal/simple-type-guards.git"
+  },
+  "keywords": [
+    "TypeScript",
+    "type",
+    "guard",
+    "user-defined",
+    "types",
+    "typing"
+  ],
+  "author": "henrik.hall2@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/henhal/simple-type-guards/issues"
+  },
+  "homepage": "https://github.com/henhal/simple-type-guards#readme"
+}

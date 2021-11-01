@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "incremental": true,
+    "target": "es2017",
+    "module": "CommonJS",
+    "lib": ["es2019", "dom"],
+    "sourceMap": true,
+    "outDir": "dist",
+    //"rootDir": ".",
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "strict": true,
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "src"
+  ]
+}
