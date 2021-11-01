@@ -1,11 +1,11 @@
-# simple-type-guards
+# simple-tg
 
 Some very simple TypeScript type guard helpers.
 
 ## Installation
 
 ```
-npm install simple-type-guards
+npm install simple-tg
 ```
 
 ## Usage
@@ -22,7 +22,7 @@ interface Foo {
 To create a user-defined type guard for `Foo`, we can do this:
 
 ```
-const isFoo = isObject({
+export const isFoo = isObject({
   a: ['string', 'undefined'],
   b: 'number',
   c: isArray(isObject({d: 'number'}))

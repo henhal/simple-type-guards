@@ -1,11 +1,16 @@
 {
-  "name": "simple-type-guards",
+  "name": "simple-tg",
   "version": "1.0.0",
   "description": "Simple type guard helpers for TypeScript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rm -rf dist",
+    "build": "tsc",
+    "prepack": "npm run clean && npm run build"
   },
   "repository": {
     "type": "git",

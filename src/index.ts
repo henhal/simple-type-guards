@@ -3,59 +3,77 @@ type Primitives = {
   number: number;
   boolean: boolean;
   bigint: bigint;
-  function: (...args: any[]) => any;
+  function: Function;
   symbol: symbol;
-  object: object;
+  object: object | null;
   undefined: undefined;
 }
 
-type ValueOf<T, V> = {
-  [P in keyof T]: T[P] extends V ? P : never
-}[keyof T];
+export type TypeGuard<T> = (x: any) => x is T;
+
+/**
+ * A matcher for a type, which is either a single primitive name, a list of primitive names, or a type guard function
+ */
+export type Matcher<P extends PrimitiveName = PrimitiveName, T = any> = P | P[] | TypeGuard<T>;
 
 type Flatten<T> = T extends Array<infer E> ? E : T;
-
-type Matcher<T extends PrimitiveName = PrimitiveName, U = any> = T | T[] | TypeGuard<U>;
 type MatchedType<T extends Matcher> = T extends TypeGuard<infer E> ? E : Primitive<Extract<Flatten<T>, PrimitiveName>>;
 
 export type Primitive<K extends keyof Primitives = keyof Primitives> = Primitives[K];
-export type PrimitiveName<V extends Primitive = Primitive> = ValueOf<Primitives, V>;
-export type TypeGuard<T> = (x: any) => x is T;
+
+export type PrimitiveName<V extends Primitive = Primitive> =
+    V extends string ? 'string' :
+        V extends number ? 'number' :
+            V extends boolean ? 'boolean' :
+                V extends bigint ? 'bigint' :
+                    V extends Function ? 'function' :
+                        V extends symbol ? 'symbol' :
+                            V extends object | null ? 'object' :
+                                V extends undefined ? 'undefined' :
+                                    never;
 
 export function guard<T>(f: (x: any) => boolean) {
   return f as TypeGuard<T>;
 }
 
-function matchType<T extends PrimitiveName>(types: T | T[]): TypeGuard<Primitive<T>> {
-  return guard(x => {
-    const type = typeof x;
 
-    return Array.isArray(types) ?
-        types.some(t => t === type) :
-        types === type;
-  });
+/**
+ * Return a type guard function checking whether a value is the type defined by the matcher
+ * @param matcher
+ */
+export function is<P extends PrimitiveName, T extends Primitives[P]>(matcher: Matcher<P, T>): TypeGuard<T> {
+  return typeof matcher === 'function' ?
+      matcher :
+      Array.isArray(matcher) ?
+          guard(x => matcher.some(t => t === typeof x)) :
+          guard(x => matcher === typeof x);
 }
 
-export function isIn<T>(values: T[]): TypeGuard<T> {
-  return guard(x => values.includes(x));
+
+/**
+ * Return a type guard function checking whether a value is an array where each element matches the matcher
+ * @param matcher
+ */
+export function isArray<P extends PrimitiveName, T extends Primitives[P]>(matcher: Matcher<P, T>): TypeGuard<T[]> {
+  return guard(x => Array.isArray(x) && x.every(is(matcher)));
 }
 
-export function is<T extends PrimitiveName, U extends Primitives[T]>(types: Matcher<T, U>): TypeGuard<U> {
-  return guard(typeof types === 'function' ? types : matchType(types));
-}
-
-export function isArray<T extends PrimitiveName, U extends Primitives[T]>(types: Matcher<T, U>): TypeGuard<U[]> {
-  return guard(x => Array.isArray(x) && x.every(is(types)));
-}
-
-export function isObject<T extends Record<any, Matcher>>(obj: T): TypeGuard<{
-  [P in keyof T]: MatchedType<T[P]>
+/**
+ * Return a type guard function checking whether a value is an object with the entries defined by the given map of property names to matchers
+ * @param matchObj
+ */
+export function isObject<M extends Record<any, Matcher>>(matchObj: M): TypeGuard<{
+  [K in keyof M]: MatchedType<M[K]>
 }> {
   return guard(x => x != null &&
       typeof x === 'object' &&
-      Object.entries(obj).every(([k ,v]) => is(v)(x[k])));
+      Object.entries(matchObj).every(([k, v]) => is(v)(x[k])));
 }
 
-
-// TODO turn generic parameter types around, isObject<Foo> should return TypeGuard<Foo> and derive the input object
-//  from T instead of the other way around
+/**
+ * Return a type guard function checking whether a value equals one of the given values
+ * @param values
+ */
+export function isIn<T>(values: T[]): TypeGuard<T> {
+  return guard(x => values.includes(x));
+}
